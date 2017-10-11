@@ -34,7 +34,7 @@ initialEntries : List Entry
 initialEntries =
     [ Entry 1 "Future-proof" 100 False
     , Entry 2 "blah" 200 False
-    , Entry 3 "fdgfdgfd" 500 True
+    , Entry 3 "xox" 500 True
     , Entry 4 "nonononoyes" 250 False
     ]
 
@@ -74,11 +74,26 @@ viewFooter =
         ]
 
 
+viewEntryItem : Entry -> Html msg
+viewEntryItem entry =
+    li [] [ text entry.phrase, text (toString entry.points) ]
+
+
+viewEntryList : List Entry -> Html msg
+viewEntryList entries =
+    let
+        listOfEntries =
+            List.map viewEntryItem entries
+    in
+    ul [] listOfEntries
+
+
 view : Model -> Html msg
 view model =
     div [ class "content" ]
         [ viewHeader "Buzword bingo"
         , viewPlayer model.name model.gameNumber
+        , viewEntryList model.entries
         , div [ class "debug" ] [ text (toString model) ]
         , viewFooter
         ]
