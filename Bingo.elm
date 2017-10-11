@@ -3,13 +3,15 @@ module Bingo exposing (..)
 import Html
 
 
--- main =
--- Html.text (String.repeat 3 (String.toUpper "rolands game #3"))
+playerInfo name gameNumber =
+    name ++ " - Game #" ++ gameNumber
+
+
+playerInfoText name gameNumber =
+    playerInfo name gameNumber
+        |> String.toUpper
+        |> Html.text
 
 
 main =
-    "rolands game #3 "
-        |> String.toUpper
-        |> String.repeat 3
-        |> String.pad 100 '*'
-        |> Html.text
+    playerInfoText "Roland " "3"
