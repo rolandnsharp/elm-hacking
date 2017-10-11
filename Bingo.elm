@@ -7,6 +7,22 @@ import Html.Attributes exposing (..)
 -- MODEL
 
 
+type alias Model =
+    { name : String
+    , gameNumber : Int
+    , entries : List Entry
+    }
+
+
+type alias Entry =
+    { id : Int
+    , phrase : String
+    , points : Int
+    , marked : Bool
+    }
+
+
+initialModel : Model
 initialModel =
     { name = "Jesus"
     , gameNumber = 1
@@ -14,9 +30,12 @@ initialModel =
     }
 
 
+initialEntries : List Entry
 initialEntries =
-    [ { id = 1, phrase = "Future-proof", points = 100, marked = False }
-    , { id = 2, phrase = "blah", points = 200, marked = False }
+    [ Entry 1 "Future-proof" 100 False
+    , Entry 2 "blah" 200 False
+    , Entry 3 "fdgfdgfd" 500 True
+    , Entry 4 "nonononoyes" 250 False
     ]
 
 
@@ -55,10 +74,7 @@ viewFooter =
         ]
 
 
-
--- view : Html msg
-
-
+view : Model -> Html msg
 view model =
     div [ class "content" ]
         [ viewHeader "Buzword bingo"
