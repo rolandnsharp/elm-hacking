@@ -76,16 +76,25 @@ viewFooter =
 
 viewEntryItem : Entry -> Html msg
 viewEntryItem entry =
-    li [] [ text entry.phrase, text (toString entry.points) ]
+    li []
+        [ span [ class "phrase" ] [ text entry.phrase ]
+        , span [ class "points" ] [ text (toString entry.points) ]
+        ]
 
 
 viewEntryList : List Entry -> Html msg
 viewEntryList entries =
-    let
-        listOfEntries =
-            List.map viewEntryItem entries
-    in
-    ul [] listOfEntries
+    entries
+        |> List.map viewEntryItem
+        |> ul []
+
+
+
+-- let
+--     listOfEntries =
+--         List.map viewEntryItem entries
+-- in
+-- ul [] listOfEntries
 
 
 view : Model -> Html msg
