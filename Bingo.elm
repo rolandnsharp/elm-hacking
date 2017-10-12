@@ -35,7 +35,7 @@ initialEntries : List Entry
 initialEntries =
     [ Entry 1 "Future-proof" 100 False
     , Entry 2 "blah" 200 False
-    , Entry 3 "xox" 500 True
+    , Entry 3 "xox" 500 False
     , Entry 4 "nonononoyes" 250 False
     ]
 
@@ -49,14 +49,15 @@ type Msg
     | Mark Int
 
 
-update : Msg -> Model -> Model
+
+-- return a tupal with the model and the collection of commands that we want the eml runtime to execute
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NewGame ->
-            { model
-                | gameNumber = model.gameNumber + 1
-                , entries = initialEntries
-            }
+            ( { model | gameNumber = model.gameNumber + 1, entries = initialEntries }, Cmd.none )
 
         Mark id ->
             let
@@ -66,7 +67,7 @@ update msg model =
                     else
                         e
             in
-            { model | entries = List.map markEntry model.entries }
+            ( { model | entries = List.map markEntry model.entries }, Cmd.none )
 
 
 
@@ -166,6 +167,7 @@ view model =
         [ viewHeader "Buzword bingo"
         , viewPlayer model.name model.gameNumber
         , viewEntryList model.entries
+        , viewScore (sumMarkedPoints model.entries)
         , div [ class "button-group" ] [ button [ onClick NewGame ] [ text "new game" ] ]
         , div [ class "debug" ] [ text (toString model) ]
         , viewFooter
@@ -180,9 +182,23 @@ view model =
 
 
 main : Program Never Model Msg
+
+
+
+-- main =
+-- Html.beginnerProgram
+--     { model = initialModel
+--     , view = view
+--     , update = update
+--     }
+
+
 main =
-    Html.beginnerProgram
-        { model = initialModel
+    Html.program
+        { init = ( initialModel, Cmd.none )
         , view = view
         , update = update
+
+        -- , subscriptions = \model -> Sub.none
+        , subscriptions = \_ -> Sub.none
         }
