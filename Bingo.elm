@@ -3,6 +3,7 @@ module Bingo exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Random
 
 
 -- MODEL
@@ -47,17 +48,24 @@ initialEntries =
 type Msg
     = NewGame
     | Mark Int
+    | NewRandom Int
 
 
 
 -- return a tupal with the model and the collection of commands that we want the eml runtime to execute
+-- All commands must be idempotent therefor randomNumber must be sent via a command to the elm runtime.
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NewRandom randomNumber ->
+            ( { model | gameNumber = randomNumber }, Cmd.none )
+
         NewGame ->
-            ( { model | gameNumber = model.gameNumber + 1, entries = initialEntries }, Cmd.none )
+            -- ( { model | gameNumber = model.gameNumber + 1, entries = initialEntries }, Cmd.none )
+            -- we want to create a random game nuber with a new game and it will have to be done in a command for the elm runtime to keep the function deterministic
+            ( { model | entries = initialEntries }, generateRandomNumber )
 
         Mark id ->
             let
@@ -73,12 +81,26 @@ update msg model =
 
 -- returns new model
 --- { record to update | name of field = current game number + 1}
--- VIEW
+-- COMMANDS
+
+
+generateRandomNumber : Cmd Msg
+generateRandomNumber =
+    -- Random.generate (\num -> NewRandom num) (Random.int 1 100)
+    Random.generate NewRandom (Random.int 1 100)
+
+
+
+-- SOMETHING
 
 
 playerInfo : String -> Int -> String
 playerInfo name gameNumber =
     name ++ " - Game #" ++ toString gameNumber
+
+
+
+-- VIEW
 
 
 viewPlayer : String -> Int -> Html Msg
@@ -195,7 +217,7 @@ main : Program Never Model Msg
 
 main =
     Html.program
-        { init = ( initialModel, Cmd.none )
+        { init = ( initialModel, generateRandomNumber )
         , view = view
         , update = update
 
