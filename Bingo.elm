@@ -3,6 +3,7 @@ module Bingo exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Http
 import Random
 
 
@@ -28,20 +29,20 @@ initialModel : Model
 initialModel =
     { name = "Jesus"
     , gameNumber = 1
-    , entries = initialEntries
+    , entries = []
+
+    -- , entries = initialEntries
     }
 
 
-initialEntries : List Entry
-initialEntries =
-    [ Entry 1 "Future-proof" 100 False
-    , Entry 2 "blah" 200 False
-    , Entry 3 "xox" 500 False
-    , Entry 4 "nonononoyes" 250 False
-    ]
 
-
-
+-- initialEntries : List Entry
+-- initialEntries =
+--     [ Entry 1 "Future-proof" 100 False
+--     , Entry 2 "blah" 200 False
+--     , Entry 3 "xox" 500 False
+--     , Entry 4 "nonononoyes" 250 False
+--     ]
 -- UPDATE
 
 
@@ -49,6 +50,7 @@ type Msg
     = NewGame
     | Mark Int
     | NewRandom Int
+    | NewEntries (Result Http.Error String)
 
 
 
@@ -65,7 +67,22 @@ update msg model =
         NewGame ->
             -- ( { model | gameNumber = model.gameNumber + 1, entries = initialEntries }, Cmd.none )
             -- we want to create a random game nuber with a new game and it will have to be done in a command for the elm runtime to keep the function deterministic
-            ( { model | entries = initialEntries }, generateRandomNumber )
+            -- ( { model | entries = initialEntries }, generateRandomNumber )
+            ( { model | gameNumber = model.gameNumber + 1 }, getEntries )
+
+        NewEntries (Ok jsonString) ->
+            let
+                _ =
+                    Debug.log "yay!" jsonString
+            in
+            ( model, Cmd.none )
+
+        NewEntries (Err error) ->
+            let
+                _ =
+                    Debug.log "errorzzzzzzzzz" error
+            in
+            ( model, Cmd.none )
 
         Mark id ->
             let
@@ -90,7 +107,23 @@ generateRandomNumber =
     Random.generate NewRandom (Random.int 1 100)
 
 
+entriesUrl : String
+entriesUrl =
+    "http://localhost:3000/random-entries"
 
+
+getEntries : Cmd Msg
+getEntries =
+    -- NewEntries message gives us a constructor function to provide result to message
+    -- Http.send NewEntries (Http.getString entriesUrl)
+    entriesUrl
+        |> Http.getString
+        |> Http.send NewEntries
+
+
+
+-- Http.send (\result -> NewEntries result ) (Http.getString entriesUrl)
+-- send : (Result Http.Error String -> Msg) -> Request String -> Cmd Msg
 -- SOMETHING
 
 
@@ -201,13 +234,8 @@ view model =
 -- main =
 --     update NewGame initialModel
 --         |> view
-
-
-main : Program Never Model Msg
-
-
-
 -- main =
+-- ####
 -- Html.beginnerProgram
 --     { model = initialModel
 --     , view = view
@@ -215,12 +243,17 @@ main : Program Never Model Msg
 --     }
 
 
+main : Program Never Model Msg
 main =
     Html.program
-        { init = ( initialModel, generateRandomNumber )
+        { init = ( initialModel, getEntries )
         , view = view
         , update = update
 
         -- , subscriptions = \model -> Sub.none
         , subscriptions = \_ -> Sub.none
         }
+
+
+
+-- elm-live Bingo.elm --open --debug --output=bingo.js
