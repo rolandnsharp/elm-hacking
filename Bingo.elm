@@ -139,6 +139,8 @@ sumMarkedPoints entries =
 
 
 
+-- sumMarkedPoints : List Entry -> Int
+-- sumMarkedPoints entries =
 -- let
 --     markedEntries =
 --         -- List.filter (\e -> e.marked) entries -- refactor
@@ -147,6 +149,15 @@ sumMarkedPoints entries =
 --         List.map .points markedEntries
 -- in
 -- List.sum pointValues
+
+
+viewScore : Int -> Html Msg
+viewScore sum =
+    div
+        [ class "score" ]
+        [ span [ class "label" ] [ text "Score" ]
+        , span [ class "value" ] [ text (toString sum) ]
+        ]
 
 
 view : Model -> Html Msg
