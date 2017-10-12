@@ -130,6 +130,25 @@ viewEntryList entries =
 -- ul [] listOfEntries
 
 
+sumMarkedPoints : List Entry -> Int
+sumMarkedPoints entries =
+    entries
+        |> List.filter .marked
+        |> List.map .points
+        |> List.sum
+
+
+
+-- let
+--     markedEntries =
+--         -- List.filter (\e -> e.marked) entries -- refactor
+--         List.filter .marked entries
+--     pointValues =
+--         List.map .points markedEntries
+-- in
+-- List.sum pointValues
+
+
 view : Model -> Html Msg
 view model =
     div [ class "content" ]
