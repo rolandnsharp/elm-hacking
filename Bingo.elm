@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode as Decode exposing (Decoder, field, succeed)
 import Random
 
 
@@ -50,12 +51,12 @@ type Msg
     = NewGame
     | Mark Int
     | NewRandom Int
-    | NewEntries (Result Http.Error String)
+    | NewEntries (Result Http.Error (List Entry))
 
 
 
 -- return a tupal with the model and the collection of commands that we want the eml runtime to execute
--- All commands must be idempotent therefor randomNumber must be sent via a command to the elm runtime.
+-- All commands must be idempotent/pure function therefor randomNumber must be sent via a command to the elm runtime.
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,12 +71,8 @@ update msg model =
             -- ( { model | entries = initialEntries }, generateRandomNumber )
             ( { model | gameNumber = model.gameNumber + 1 }, getEntries )
 
-        NewEntries (Ok jsonString) ->
-            let
-                _ =
-                    Debug.log "yay!" jsonString
-            in
-            ( model, Cmd.none )
+        NewEntries (Ok randomEntries) ->
+            ( { model | entries = randomEntries }, Cmd.none )
 
         NewEntries (Err error) ->
             let
@@ -93,6 +90,19 @@ update msg model =
                         e
             in
             ( { model | entries = List.map markEntry model.entries }, Cmd.none )
+
+
+
+--DECODERS
+
+
+entryDecoder : Decoder Entry
+entryDecoder =
+    Decode.map4 Entry
+        (field "id" Decode.int)
+        (field "phrase" Decode.string)
+        (field "points" Decode.int)
+        (succeed False)
 
 
 
@@ -116,15 +126,16 @@ getEntries : Cmd Msg
 getEntries =
     -- NewEntries message gives us a constructor function to provide result to message
     -- Http.send NewEntries (Http.getString entriesUrl)
-    entriesUrl
-        |> Http.getString
+    -- entriesUrl
+    --     |> Http.getString
+    --     |> Http.send NewEntries
+    -- Http.send (\result -> NewEntries result ) (Http.getString entriesUrl)
+    -- send : (Result Http.Error String -> Msg) -> Request String -> Cmd Msg
+    -- SOMETHING
+    -- Using decoding
+    Decode.list entryDecoder
+        |> Http.get entriesUrl
         |> Http.send NewEntries
-
-
-
--- Http.send (\result -> NewEntries result ) (Http.getString entriesUrl)
--- send : (Result Http.Error String -> Msg) -> Request String -> Cmd Msg
--- SOMETHING
 
 
 playerInfo : String -> Int -> String
